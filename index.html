@@ -7,51 +7,44 @@
   <title>Wallpaper Search</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="my-style.css">
-    </head>
+</head>
 <body>
   <div class="container">
     <h1>Wallpaper Search</h1>
     <p>Enter a name to fetch wallpapers:</p>
 
- 
     <form id="queryForm">
       <input type="text" id="nameInput" placeholder="Enter a name (e.g., furina)" required>
       <button type="submit">Search</button>
     </form>
-
 
     <div id="loading" class="hidden">
       <div>loading...</div>
       <div></div>
       <div></div>
     </div>
-
     
     <div id="results" class="hidden">
       <h2>Search Results:</h2>
       <br>
       <div id="wallpaperList"></div>
     </div>
-
     
     <div id="error" class="hidden">
       <p>No results found. Please try a different query or try again later.</p>
     </div>
   </div>
 
-  
   <div class="modal" id="imageModal">
     <span class="close-modal">&times;</span>
     <img src="" alt="Full View">
   </div>
 
   <script>
-    
     let page = 1; 
     const limit = 40; 
     let isLoading = false; 
 
-    
     const queryForm = document.getElementById("queryForm");
     const nameInput = document.getElementById("nameInput");
     const resultsDiv = document.getElementById("results");
@@ -62,24 +55,19 @@
     const modalImage = modal.querySelector("img");
     const closeModalButton = modal.querySelector(".close-modal");
 
-    
     queryForm.addEventListener("submit", async (e) => {
       e.preventDefault(); 
 
-      
       page = 1; 
       resultsDiv.classList.add("hidden");
       wallpaperList.innerHTML = ""; 
       errorDiv.classList.add("hidden");
 
-    
       loadingDiv.classList.remove("hidden");
 
-      
       await fetchWallpapers();
     });
 
-    
     async function fetchWallpapers() {
       if (isLoading) return; 
       isLoading = true;
@@ -94,74 +82,66 @@
 
       try {
         const response = await fetch(
-          `https://ironman.koyeb.app/ironman/wallpaper/wpcom?name=${encodeURIComponent(
-            name
-          )}&page=${page}&limit=${limit}`
+          `https://bk9.fun/pinterest/search?q=${encodeURIComponent(name)}`
         );
 
         if (!response.ok) {
           throw new Error("API returned an error");
         }
 
-        const wallpapers = await response.json();
+        const data = await response.json();
+        const wallpapers = data.BK9;
 
-        
         if (wallpapers.length === 0 && page === 1) {
           throw new Error("No results found");
         }
 
-        
         if (wallpapers.length === 0) {
           console.log("No more results to load.");
           window.removeEventListener("scroll", handleScroll);
           return;
         }
 
-        
         wallpapers.forEach((wallpaper) => {
           const wallpaperDiv = document.createElement("div");
           wallpaperDiv.className = "wallpaper";
 
           wallpaperDiv.innerHTML = `
-            <img src="${wallpaper.image}" alt="${wallpaper.title}">
-            <h3>${wallpaper.title}</h3>
+            <img src="${wallpaper.images_url}" alt="${wallpaper.grid_title}">
+            <h3>${wallpaper.grid_title}</h3>
           `;
 
           const wallpaperImage = wallpaperDiv.querySelector("img");
           wallpaperImage.addEventListener("click", () => {
-         modalImage.src = ""; 
-         modalImage.src = wallpaper.image; 
-          modal.classList.add("visible");
-});
+            modalImage.src = ""; 
+            modalImage.src = wallpaper.images_url; 
+            modal.classList.add("visible");
+          });
 
           wallpaperList.appendChild(wallpaperDiv);
         });
 
-        resultsDiv.classList.remove("hidden"); 
-        page++; // Increment page number for next load It :) glad i got this
+        resultsDiv.classList.remove("hidden");
+        page++;
       } catch (error) {
         console.error("Error fetching wallpapers:", error);
-        if (page === 1) errorDiv.classList.remove("hidden"); // Show error only for the first page
+        if (page === 1) errorDiv.classList.remove("hidden"); 
       } finally {
-        
         loadingDiv.classList.add("hidden");
         isLoading = false; 
       }
     }
 
-    
     function handleScroll() {
       const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
 
       if (scrollTop + clientHeight >= scrollHeight - 100) {
-        fetchWallpapers(); // Fetch more wallpapers from iron man api thanks bro
+        fetchWallpapers(); 
       }
     }
 
-    
     window.addEventListener("scroll", handleScroll);
 
-    
     closeModalButton.addEventListener("click", () => {
       modal.classList.remove("visible");
     });
